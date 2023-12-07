@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/consoledot/notely/notes"
 )
 
 
@@ -10,12 +12,10 @@ import (
 func main(){
 		server := http.NewServeMux()
 
-		server.HandleFunc("/", func (w http.ResponseWriter, r *http.Request){
-				w.Write([]byte("Welcome"))
-		})
+		server.HandleFunc("/", notes.NotesController)
 
 		err := http.ListenAndServe(":8080", server)
-		if err == nil{
+		if err != nil{
 			panic("Server failed to start")
 		}
 }
