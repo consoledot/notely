@@ -7,6 +7,7 @@ import (
 
 	db "github.com/consoledot/notely/database"
 	"github.com/consoledot/notely/notes"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -26,8 +27,8 @@ func main() {
 }
 
 func routes() http.Handler {
-	router := http.NewServeMux()
-
-	router.HandleFunc("/", notes.NotesController)
+	router := mux.NewRouter()
+	router.HandleFunc("/", notes.CreateNewNotes).Methods("POST")
+	router.HandleFunc("/", notes.GetNotes).Methods("GET")
 	return router
 }
