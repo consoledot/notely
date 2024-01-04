@@ -2,9 +2,12 @@ package db
 
 import (
 	"context"
+
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -12,8 +15,13 @@ import (
 var Client *mongo.Client
 
 func Connect() {
+
+	if err := godotenv.Load(".env"); err != nil {
+		log.Fatal("Failed to load evn file")
+	}
+
 	//  Set up connection string
-	mongoURI := "mongodb://localhost:27017"
+	mongoURI := os.Getenv("MONGO_URI")
 
 	// Set up options
 	clientOptions := options.Client().ApplyURI(mongoURI)
