@@ -34,7 +34,7 @@ func Connect() {
 	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error connecting", err)
 	}
 	Client = client
 	log.Println("Connected to MongoDb")
@@ -46,4 +46,8 @@ func Disconnect() {
 		log.Fatal(err)
 	}
 	log.Println("Disconnected from MongoDb")
+}
+
+func NotesCollection() *mongo.Collection {
+	return Client.Database("notely").Collection("notes")
 }

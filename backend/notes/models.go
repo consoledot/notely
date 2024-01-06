@@ -1,11 +1,16 @@
 package notes
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Note struct {
-	Title     string
-	Author    string
-	CreatedAt time.Time
+	ID        primitive.ObjectID `bson:"_id,omitempty"`
+	Title     string             `bson:"title"`
+	Author    string             `bson:"author"`
+	CreatedAt time.Time          `bson:"created_at"`
 }
 
 var notes []Note
