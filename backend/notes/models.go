@@ -14,19 +14,3 @@ type Note struct {
 }
 
 var notes []Note
-
-func AddNote(note Note) {
-	notes = append(notes, note)
-}
-
-func GetNote(index int32) Note {
-	return notes[index]
-}
-
-func GetAllNotes() []Note {
-	if len(notes) <= 0 {
-		return []Note{}
-	}
-
-	return notes
-}

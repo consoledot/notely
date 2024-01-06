@@ -40,6 +40,8 @@ func routes() http.Handler {
 	router := mux.NewRouter()
 	router.HandleFunc("/", notes.CreateNewNotes).Methods("POST")
 	router.HandleFunc("/", notes.GetNotes).Methods("GET")
+	router.HandleFunc("/{id}", notes.DeleteNote).Methods("DELETE")
+	router.HandleFunc("/{id}", notes.GetNote).Methods("GET")
 	return router
 }
 

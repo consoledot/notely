@@ -8,7 +8,9 @@ import (
 	"net/http"
 
 	db "github.com/consoledot/notely/database"
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetNotes(w http.ResponseWriter, r *http.Request) {
@@ -69,5 +71,52 @@ func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
+	var coll = db.NotesCollection()
+	// Get variables
+	vars := mux.Vars(r)
+	id := vars["id"]
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		fmt.Println("Id is not a primitive id: ", err)
+	}
+
+	note := bson.D{{Key: "_id", Value: objId}}
+
+	result, err := coll.DeleteOne(context.TODO(), note)
+	if err != nil || result.DeletedCount <= 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Note not found"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Note deleted"))
+
+}
+
+func GetNote(w http.ResponseWriter, r *http.Request) {
+	var coll = db.NotesCollection()
+	// Get variables
+	vars := mux.Vars(r)
+	id := vars["id"]
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		fmt.Println("Id is not a primitive id: ", err)
+		w.Write([]byte("Not a valid ID"))
+		return
+	}
+
+	note := bson.D{{Key: "_id", Value: objId}}
+
+	var result Note
+	err = coll.FindOne(context.TODO(), note).Decode(&result)
+	if err != nil {
+		fmt.Println("Not found: ", err)
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Note not found"))
+		return
+	}
+	w.WriteHeader(http.StatusFound)
+	json.NewEncoder(w).Encode(result)
 
 }
