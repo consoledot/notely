@@ -2,22 +2,25 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"log"
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+var _ = godotenv.Load()
 var (
 	Client *mongo.Client
 	dbName = os.Getenv("MONGO_DATABASE_NAME")
 )
 
 func Connect() {
-
+	fmt.Println("Dban", dbName)
 	//  Set up connection string
 	mongoURI := os.Getenv("MONGO_URI")
 
