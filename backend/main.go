@@ -13,18 +13,19 @@ import (
 	db "github.com/consoledot/notely/database"
 	"github.com/consoledot/notely/notes"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-
+	_ = godotenv.Load()
 	db.Connect()
 	defer db.Disconnect()
 
 	server := &http.Server{
 		Addr:         ":8181",
 		Handler:      routes(),
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  50 * time.Second,
+		WriteTimeout: 50 * time.Second,
 	}
 	// Graceful shutdown
 	go shutdownServer(server)
@@ -52,7 +53,7 @@ func shutdownServer(server *http.Server) {
 	<-c
 	fmt.Println("\n Shutting down the server ...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
 	defer cancel()
 

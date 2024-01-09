@@ -4,105 +4,93 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	db "github.com/consoledot/notely/database"
-	"github.com/gorilla/mux"
+	httplib "github.com/consoledot/notely/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func GetNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
-	w.Header().Set("Content-Type", "application/json")
-	// id := r.URL.Query()["id"]
-	// if id != nil {
-	// 	index, err := strconv.Atoi(id[0])
-	// 	if err == nil && index < len(GetAllNotes()) {
-	// 		w.WriteHeader(http.StatusOK)
-	// 		json.NewEncoder(w).Encode(GetAllNotes()[index])
-	// 	} else {
-	// 		w.WriteHeader(http.StatusBadRequest)
-	// 		http.Error(w, "Note not available or doesn't exist", http.StatusBadRequest)
-	// 	}
-	// 	return
-	// }
+	c := httplib.C{W: w, R: r}
 
 	var result []Note
 	cusror, err := coll.Find(context.TODO(), bson.D{})
 	if err != nil {
-		log.Panic(err)
+		fmt.Println(err)
+		c.Response(false, nil, "Error getting notes", http.StatusNoContent)
 
 	}
 
 	if err = cusror.All(context.TODO(), &result); err != nil {
-		log.Panic(err)
+		fmt.Println(err)
+		c.Response(false, nil, "Error getting notes", http.StatusNoContent)
 	}
 
-	fmt.Println(result)
-	// fmt.Println(cusror)
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(result)
+	c.Response(true, result, "get all notes", http.StatusOK)
 
 }
 
 func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
-	w.Header().Set("Content-Type", "application/json")
+	c := httplib.C{W: w, R: r}
 	var note Note
 	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+		c.Response(false, nil, "error creating note", http.StatusBadRequest)
 		return
 	}
 
 	result, err := coll.InsertOne(context.TODO(), note)
 	if err != nil {
-		log.Panic("Error creating note ", err)
+		fmt.Println(err)
+		c.Response(false, nil, "error creating note", http.StatusBadRequest)
+		return
 	}
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-	// AddNote(note)
-	fmt.Println(result)
-	w.WriteHeader(http.StatusCreated)
-	w.Write([]byte("Note added successfully"))
+
+	c.Response(true, result, "note added successfully", http.StatusCreated)
+
 }
 
 func DeleteNote(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
+	c := httplib.C{W: w, R: r}
+
 	// Get variables
-	vars := mux.Vars(r)
-	id := vars["id"]
+	id := c.GetParamsById(`id`)
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		fmt.Println("Id is not a primitive id: ", err)
+		fmt.Println(err)
+		c.Response(false, nil, "id is not a valid id", http.StatusBadRequest)
+		return
 	}
 
 	note := bson.D{{Key: "_id", Value: objId}}
 
 	result, err := coll.DeleteOne(context.TODO(), note)
 	if err != nil || result.DeletedCount <= 0 {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Note not found"))
+
+		fmt.Println(err)
+		c.Response(false, nil, "note not found", http.StatusNotFound)
 		return
 	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Note deleted"))
+	c.Response(true, nil, "note deleted", http.StatusOK)
 
 }
 
 func GetNote(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
+	c := httplib.C{W: w, R: r}
+
 	// Get variables
-	vars := mux.Vars(r)
-	id := vars["id"]
+
+	id := c.GetParamsById(`id`)
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		fmt.Println("Id is not a primitive id: ", err)
-		w.Write([]byte("Not a valid ID"))
+		fmt.Println(err)
+		c.Response(false, nil, "id is not a valid id", http.StatusBadRequest)
 		return
 	}
 
@@ -111,12 +99,10 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 	var result Note
 	err = coll.FindOne(context.TODO(), note).Decode(&result)
 	if err != nil {
-		fmt.Println("Not found: ", err)
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Note not found"))
+		fmt.Println(err)
+		c.Response(false, nil, "note not found", http.StatusNotFound)
 		return
 	}
-	w.WriteHeader(http.StatusFound)
-	json.NewEncoder(w).Encode(result)
+	c.Response(true, result, "note found", http.StatusFound)
 
 }

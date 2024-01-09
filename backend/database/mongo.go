@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"log"
 	"os"
@@ -12,14 +13,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
+var _ = godotenv.Load()
+var (
+	Client *mongo.Client
+	dbName = os.Getenv("MONGO_DATABASE_NAME")
+)
 
 func Connect() {
-
-	if err := godotenv.Load(".env"); err != nil {
-		log.Fatal("Failed to load evn file")
-	}
-
+	fmt.Println("Dban", dbName)
 	//  Set up connection string
 	mongoURI := os.Getenv("MONGO_URI")
 
@@ -49,5 +50,5 @@ func Disconnect() {
 }
 
 func NotesCollection() *mongo.Collection {
-	return Client.Database("notely").Collection("notes")
+	return Client.Database(dbName).Collection("notes")
 }
