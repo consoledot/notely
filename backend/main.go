@@ -43,6 +43,7 @@ func routes() http.Handler {
 	router.HandleFunc("/", notes.GetNotes).Methods("GET")
 	router.HandleFunc("/{id}", notes.DeleteNote).Methods("DELETE")
 	router.HandleFunc("/{id}", notes.GetNote).Methods("GET")
+	router.HandleFunc("/{id}", notes.EditNote).Methods("PUT")
 	return router
 }
 

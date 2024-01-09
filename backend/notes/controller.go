@@ -106,3 +106,29 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 	c.Response(true, result, "note found", http.StatusFound)
 
 }
+
+func EditNote(w http.ResponseWriter, r *http.Request) {
+	var coll = db.NotesCollection()
+	c := httplib.C{W: w, R: r}
+	id := c.GetParamsById(`id`)
+
+	var note Note
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		fmt.Println(err)
+		c.Response(false, nil, "error updating note", http.StatusCreated)
+		return
+	}
+
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		fmt.Println(err)
+		c.Response(false, nil, "id is not a valid id", http.StatusBadRequest)
+		return
+	}
+	filter := bson.D{{Key: "_id", Value: objId}}
+
+	_ = coll.FindOneAndUpdate(context.TODO(), filter, bson.M{"$set": note})
+
+	c.Response(true, nil, "note updated successfully", http.StatusAccepted)
+
+}
