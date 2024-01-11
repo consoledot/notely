@@ -52,3 +52,7 @@ func Disconnect() {
 func NotesCollection() *mongo.Collection {
 	return Client.Database(dbName).Collection("notes")
 }
+
+func UsersCollection() *mongo.Collection {
+	return Client.Database(dbName).Collection("users")
+}

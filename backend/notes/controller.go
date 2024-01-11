@@ -43,14 +43,14 @@ func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, err := coll.InsertOne(context.TODO(), note)
+	_, err := coll.InsertOne(context.TODO(), note)
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest)
 		return
 	}
 
-	c.Response(true, result, "note added successfully", http.StatusCreated)
+	c.Response(true, nil, "note added successfully", http.StatusCreated)
 
 }
 
