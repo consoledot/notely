@@ -37,7 +37,8 @@ func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
 	c := httplib.C{W: w, R: r}
 	var note Note
-	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+
+	if err := c.GetJSONfromRequestBody(&note); err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest)
 		return

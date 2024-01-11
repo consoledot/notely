@@ -33,3 +33,11 @@ func (user *User) DeleteUser() error {
 	return err
 
 }
+
+func (user *User) DoesUserExit() bool {
+	coll := db.UsersCollection()
+	filter := bson.D{{Key: "email", Value: user.Email}}
+	err := coll.FindOne(context.TODO(), filter).Err()
+
+	return err != nil
+}

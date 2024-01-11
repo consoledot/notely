@@ -10,6 +10,6 @@ type (
 		Email           string `json:"email"`
 		Name            string `json:"name"`
 		Password        string `json:"password"`
-		ConfirmPassword string `json:"conform_password"`
+		ConfirmPassword string `json:"confirm_password"`
 	}
 )
