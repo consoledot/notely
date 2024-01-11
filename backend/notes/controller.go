@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	db "github.com/consoledot/notely/database"
-	httplib "github.com/consoledot/notely/utils"
+	httplib "github.com/consoledot/notely/utils/httplib"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
