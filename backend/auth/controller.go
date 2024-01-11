@@ -11,7 +11,7 @@ import (
 
 func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	c := httplib.C{W: w, R: r}
-	var request SignIn
+	var request SignUp
 	if err := c.GetJSONfromRequestBody(&request); err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "Error reading request", http.StatusBadRequest)
@@ -34,11 +34,27 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "User already exist", http.StatusBadRequest)
 		return
 	}
-	if err := user.CreateUser(); err != nil {
+	userId, err := user.CreateUser()
+	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "Error creating account", http.StatusBadGateway)
 		return
 	}
-	c.Response(true, request, "Request successful", http.StatusCreated)
+	userIdstr, ok := userId.(string)
+	if !ok {
+		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway)
+		return
+	}
+	token, err := cryptolib.CreateToken(userIdstr)
+	if err != nil {
+		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway)
+		return
+	}
+
+	c.Response(true, token, "Request successful", http.StatusCreated)
+
+}
+
+func SignIn(w http.ResponseWriter, r *http.Request) {
 
 }

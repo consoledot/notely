@@ -15,12 +15,12 @@ func NewUser(email string, name string, passwordHash string) *User {
 	}
 }
 
-func (user *User) CreateUser() error {
+func (user *User) CreateUser() (interface{}, error) {
 	coll := db.UsersCollection()
 
-	_, err := coll.InsertOne(context.TODO(), user)
+	result, err := coll.InsertOne(context.TODO(), user)
 
-	return err
+	return result.InsertedID, err
 
 }
 
@@ -40,4 +40,13 @@ func (user *User) DoesUserExit() bool {
 	err := coll.FindOne(context.TODO(), filter).Err()
 
 	return err != nil
+}
+
+func (user *User) GetUser() (User, error) {
+	coll := db.UsersCollection()
+	var n User
+	filter := bson.D{{Key: "_id", Value: user.Id}}
+	err := coll.FindOne(context.TODO(), filter).Decode(&n)
+
+	return n, err
 }
