@@ -46,3 +46,8 @@ func (c *C) GetParamsById(id string) string {
 	vars := mux.Vars(c.R)
 	return vars[id]
 }
+
+func (c *C) GetJSONfromRequestBody(data any) error {
+	err := json.NewDecoder(c.R.Body).Decode(data)
+	return err
+}

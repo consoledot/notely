@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	db "github.com/consoledot/notely/database"
-	httplib "github.com/consoledot/notely/utils"
+	httplib "github.com/consoledot/notely/utils/httplib"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -37,20 +37,21 @@ func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
 	c := httplib.C{W: w, R: r}
 	var note Note
-	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+
+	if err := c.GetJSONfromRequestBody(&note); err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest)
 		return
 	}
 
-	result, err := coll.InsertOne(context.TODO(), note)
+	_, err := coll.InsertOne(context.TODO(), note)
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest)
 		return
 	}
 
-	c.Response(true, result, "note added successfully", http.StatusCreated)
+	c.Response(true, nil, "note added successfully", http.StatusCreated)
 
 }
 
@@ -104,5 +105,31 @@ func GetNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	c.Response(true, result, "note found", http.StatusFound)
+
+}
+
+func EditNote(w http.ResponseWriter, r *http.Request) {
+	var coll = db.NotesCollection()
+	c := httplib.C{W: w, R: r}
+	id := c.GetParamsById(`id`)
+
+	var note Note
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		fmt.Println(err)
+		c.Response(false, nil, "error updating note", http.StatusCreated)
+		return
+	}
+
+	objId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		fmt.Println(err)
+		c.Response(false, nil, "id is not a valid id", http.StatusBadRequest)
+		return
+	}
+	filter := bson.D{{Key: "_id", Value: objId}}
+
+	_ = coll.FindOneAndUpdate(context.TODO(), filter, bson.M{"$set": note})
+
+	c.Response(true, nil, "note updated successfully", http.StatusAccepted)
 
 }

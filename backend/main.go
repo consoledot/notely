@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/consoledot/notely/auth"
 	db "github.com/consoledot/notely/database"
 	"github.com/consoledot/notely/notes"
 	"github.com/gorilla/mux"
@@ -43,6 +44,8 @@ func routes() http.Handler {
 	router.HandleFunc("/", notes.GetNotes).Methods("GET")
 	router.HandleFunc("/{id}", notes.DeleteNote).Methods("DELETE")
 	router.HandleFunc("/{id}", notes.GetNote).Methods("GET")
+	router.HandleFunc("/{id}", notes.EditNote).Methods("PUT")
+	router.HandleFunc("/auth/create-account", auth.CreateAccount).Methods("POST")
 	return router
 }
 
