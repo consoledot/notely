@@ -17,6 +17,7 @@ type StandardResponse struct {
 	Message string      `json:"message,omitempty"`
 	Error   interface{} `json:"error,omitempty"`
 	Success bool        `json:"success,omitempty"`
+	Token   interface{} `json:"token,omitempty"`
 }
 
 func responseJSON(res http.ResponseWriter, status int, object interface{}) {
@@ -30,12 +31,13 @@ func responseJSON(res http.ResponseWriter, status int, object interface{}) {
 
 }
 
-func (c *C) Response(success bool, data interface{}, message string, status int) {
+func (c *C) Response(success bool, data interface{}, message string, status int, token interface{}) {
 
 	response := StandardResponse{
 		Success: success,
 		Message: message,
 		Data:    data,
+		Token:   token,
 	}
 
 	responseJSON(c.W, status, response)

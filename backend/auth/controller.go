@@ -14,47 +14,82 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 	var request SignUp
 	if err := c.GetJSONfromRequestBody(&request); err != nil {
 		fmt.Println(err)
-		c.Response(false, nil, "Error reading request", http.StatusBadRequest)
+		c.Response(false, nil, "Error reading request", http.StatusBadRequest, nil)
 		return
 	}
 
 	if request.Password != request.ConfirmPassword {
-		c.Response(false, nil, "Password must be the same", http.StatusBadRequest)
+		c.Response(false, nil, "Password must be the same", http.StatusBadRequest, nil)
 		return
 	}
 	passwordHash, err := cryptolib.Hash(request.Password)
 	if err != nil {
 		fmt.Println(err)
-		c.Response(false, nil, "Error creating account, try again", http.StatusBadRequest)
+		c.Response(false, nil, "Error creating account, try again", http.StatusBadRequest, nil)
 		return
 	}
-	user := user.User{Email: request.Email, Name: request.Name, PasswordHash: passwordHash}
+	user := user.NewUser(request.Email, request.Name, passwordHash)
 
-	if ok := user.DoesUserExit(); !ok {
-		c.Response(false, nil, "User already exist", http.StatusBadRequest)
+	if ok := user.DoesUserExit(); ok {
+		c.Response(false, nil, "User already exist", http.StatusBadRequest, nil)
 		return
 	}
 	userId, err := user.CreateUser()
 	if err != nil {
 		fmt.Println(err)
-		c.Response(false, nil, "Error creating account", http.StatusBadGateway)
+		c.Response(false, nil, "Error creating account", http.StatusBadGateway, nil)
 		return
 	}
 	userIdstr, ok := userId.(string)
 	if !ok {
-		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway)
+		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
 	}
 	token, err := cryptolib.CreateToken(userIdstr)
 	if err != nil {
-		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway)
+		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
 	}
 
-	c.Response(true, token, "Request successful", http.StatusCreated)
+	c.Response(true, nil, "Request successful", http.StatusCreated, token)
 
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
+	c := httplib.C{W: w, R: r}
+	var request Login
+
+	if err := c.GetJSONfromRequestBody(&request); err != nil {
+		fmt.Println(err)
+		c.Response(false, nil, "Error reading request", http.StatusBadRequest, nil)
+		return
+	}
+
+	user := user.NewUser(request.Email, "", request.Password)
+
+	if ok := user.DoesUserExit(); !ok {
+		c.Response(false, nil, "User does not exist", http.StatusBadRequest, nil)
+		return
+
+	}
+
+	if ok := user.DoesPassWordMatch(); !ok {
+		c.Response(false, nil, "Invalid credentials", http.StatusBadRequest, nil)
+		return
+	}
+	result, err := user.GetUser("email", user.Email)
+
+	if err != nil {
+		c.Response(false, nil, "Error getting user details, try again", http.StatusInternalServerError, nil)
+		return
+	}
+	userId := result.Id.Hex()
+	token, err := cryptolib.CreateToken(userId)
+	if err != nil {
+		fmt.Println(userId, err, token)
+		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
+		return
+	}
+	c.Response(false, result, "user account gotten", http.StatusOK, token)
 
 }

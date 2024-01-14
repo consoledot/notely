@@ -46,6 +46,7 @@ func routes() http.Handler {
 	router.HandleFunc("/{id}", notes.GetNote).Methods("GET")
 	router.HandleFunc("/{id}", notes.EditNote).Methods("PUT")
 	router.HandleFunc("/auth/create-account", auth.CreateAccount).Methods("POST")
+	router.HandleFunc("/auth/sign-in", auth.SignIn).Methods("POST")
 	return router
 }
 

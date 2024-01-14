@@ -4,6 +4,7 @@ import (
 	"context"
 
 	db "github.com/consoledot/notely/database"
+	cryptolib "github.com/consoledot/notely/utils/crypto"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -33,20 +34,26 @@ func (user *User) DeleteUser() error {
 	return err
 
 }
-
-func (user *User) DoesUserExit() bool {
-	coll := db.UsersCollection()
-	filter := bson.D{{Key: "email", Value: user.Email}}
-	err := coll.FindOne(context.TODO(), filter).Err()
-
-	return err != nil
-}
-
-func (user *User) GetUser() (User, error) {
+func (user *User) GetUser(key string, value string) (User, error) {
 	coll := db.UsersCollection()
 	var n User
-	filter := bson.D{{Key: "_id", Value: user.Id}}
+	filter := bson.D{{Key: key, Value: value}}
 	err := coll.FindOne(context.TODO(), filter).Decode(&n)
 
 	return n, err
+}
+
+func (user *User) DoesUserExit() bool {
+
+	_, err := user.GetUser("email", user.Email)
+
+	return err == nil
+}
+
+func (user *User) DoesPassWordMatch() bool {
+	result, _ := user.GetUser("email", user.Email)
+
+	return cryptolib.CompareHashWithText(result.PasswordHash, user.PasswordHash)
+	// return result.PasswordHash == user.PasswordHash
+
 }
