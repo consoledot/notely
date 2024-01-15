@@ -34,18 +34,18 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "User already exist", http.StatusBadRequest, nil)
 		return
 	}
-	userId, err := user.CreateUser()
+	_, err = user.CreateUser()
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "Error creating account", http.StatusBadGateway, nil)
 		return
 	}
-	userIdstr, ok := userId.(string)
-	if !ok {
-		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
-		return
-	}
-	token, err := cryptolib.CreateToken(userIdstr)
+	// userIdstr, ok := userId.(string)
+	// if !ok {
+	// 	c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
+	// 	return
+	// }
+	token, err := cryptolib.CreateToken(user.Email)
 	if err != nil {
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
@@ -77,19 +77,19 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Invalid credentials", http.StatusBadRequest, nil)
 		return
 	}
-	result, err := user.GetUser("email", user.Email)
+	// result, err := user.GetUser("email", user.Email)
 
+	// if err != nil {
+	// 	c.Response(false, nil, "Error getting user details, try again", http.StatusInternalServerError, nil)
+	// 	return
+	// }
+	// userId := result.Id.Hex()
+	token, err := cryptolib.CreateToken(user.Email)
 	if err != nil {
-		c.Response(false, nil, "Error getting user details, try again", http.StatusInternalServerError, nil)
-		return
-	}
-	userId := result.Id.Hex()
-	token, err := cryptolib.CreateToken(userId)
-	if err != nil {
-		fmt.Println(userId, err, token)
+		fmt.Println(err, token)
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
 	}
-	c.Response(false, result, "user account gotten", http.StatusOK, token)
+	c.Response(false, nil, "user account gotten", http.StatusOK, token)
 
 }
