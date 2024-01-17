@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// var _ = godotenv.Load()
+var _ = godotenv.Load()
 
 func Hash(text string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(text), 14)
@@ -24,10 +24,10 @@ func CompareHashWithText(hash string, text string) bool {
 }
 
 func CreateToken(id string) (string, error) {
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Error loading .env file: \n", err)
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	fmt.Println("Error loading .env file: \n", err)
+	// }
 	fmt.Println("JWT_SECRET_KEY:", os.Getenv("JWT_SECRET_KEY"))
 	// Create a new claim
 	fmt.Printf("id %v \n", id)
