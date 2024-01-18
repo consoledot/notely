@@ -23,23 +23,37 @@ func CompareHashWithText(hash string, text string) bool {
 	return err == nil
 }
 
-func CreateToken(id string) (string, error) {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	fmt.Println("Error loading .env file: \n", err)
-	// }
+func CreateToken(email string) (string, error) {
+
 	fmt.Println("JWT_SECRET_KEY:", os.Getenv("JWT_SECRET_KEY"))
 	// Create a new claim
-	fmt.Printf("id %v \n", id)
+
 	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"email": email,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
-	fmt.Printf("claim %v \n", claims)
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
-	fmt.Printf("token %v \n", token)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
-	fmt.Printf("tokenstr %v \n", tokenString)
 
 	return tokenString, err
+}
+
+func ParseToken(tokenString string) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
+
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return nil, fmt.Errorf("Invalid token")
+	}
+
+	email := claims["email"]
+	return email, err
 }
