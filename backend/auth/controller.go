@@ -40,11 +40,6 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Error creating account", http.StatusBadGateway, nil)
 		return
 	}
-	// userIdString, ok := userId.(string)
-	// if !ok {
-	// 	c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
-	// 	return
-	// }
 	token, err := cryptolib.CreateToken(user.Email)
 	if err != nil {
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
@@ -77,25 +72,42 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Invalid credentials", http.StatusBadRequest, nil)
 		return
 	}
-	// result, err := user.GetUser("email", user.Email)
-
-	// if err != nil {
-	// 	c.Response(false, nil, "Error getting user details, try again", http.StatusInternalServerError, nil)
-	// 	return
-	// }
-	// userId := result.Id.Hex()
-	// userIdString, ok := userId.(string)
-	// if !ok {
-	// 	c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
-	// 	return
-	// }
-	// userIdString, _ :=
 	token, err := cryptolib.CreateToken(user.Email)
 	if err != nil {
 		fmt.Println(err, token)
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
 	}
-	c.Response(false, nil, "user account gotten", http.StatusOK, token)
+	c.Response(true, nil, "user account gotten", http.StatusOK, token)
+
+}
+
+func GetUserDetails(w http.ResponseWriter, r *http.Request) {
+	c := httplib.C{W: w, R: r}
+
+	tokenInterface, err := c.GetTokenStringFromHeader()
+	if err != nil {
+		c.Response(false, nil, "No token found", http.StatusBadRequest, nil)
+	}
+	tokenString, _ := tokenInterface.(string)
+
+	email, err := cryptolib.ParseToken(tokenString)
+	if err != nil {
+
+		c.Response(false, nil, "Token is invalid", http.StatusBadRequest, nil)
+		return
+	}
+
+	var user user.User
+	emailString, _ := email.(string)
+	user.Email = string(emailString)
+
+	result, err := user.GetUser("email", emailString)
+	if err != nil {
+		c.Response(false, nil, "No user found", http.StatusForbidden, nil)
+		return
+	}
+
+	c.Response(true, result, "user found", http.StatusOK, nil)
 
 }

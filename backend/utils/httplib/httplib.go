@@ -2,7 +2,9 @@ package httplib
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -52,4 +54,16 @@ func (c *C) GetParamsById(id string) string {
 func (c *C) GetJSONfromRequestBody(data any) error {
 	err := json.NewDecoder(c.R.Body).Decode(data)
 	return err
+}
+
+func (c *C) GetTokenStringFromHeader() (interface{}, error) {
+	authHeader := c.R.Header.Get("Authorization")
+
+	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+		token := authHeader[7:]
+
+		return token, nil
+	} else {
+		return nil, fmt.Errorf("no token found")
+	}
 }
