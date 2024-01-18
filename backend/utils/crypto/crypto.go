@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	jwt "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -23,20 +23,17 @@ func CompareHashWithText(hash string, text string) bool {
 	return err == nil
 }
 
-func CreateToken(id string) (string, error) {
-	// err := godotenv.Load()
-	// if err != nil {
-	// 	fmt.Println("Error loading .env file: \n", err)
-	// }
+func CreateToken(email string) (string, error) {
+
 	fmt.Println("JWT_SECRET_KEY:", os.Getenv("JWT_SECRET_KEY"))
 	// Create a new claim
-	fmt.Printf("id %v \n", id)
+	fmt.Printf("id %v \n", email)
 	claims := jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
+		"email": email,
+		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 	fmt.Printf("claim %v \n", claims)
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	fmt.Printf("token %v \n", token)
 	tokenString, err := token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 	fmt.Printf("tokenstr %v \n", tokenString)
