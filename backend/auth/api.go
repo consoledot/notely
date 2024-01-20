@@ -81,33 +81,3 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 	c.Response(true, nil, "user account gotten", http.StatusOK, token)
 
 }
-
-func GetUserDetails(w http.ResponseWriter, r *http.Request) {
-	c := httplib.C{W: w, R: r}
-
-	tokenInterface, err := c.GetTokenStringFromHeader()
-	if err != nil {
-		c.Response(false, nil, "No token found", http.StatusBadRequest, nil)
-	}
-	tokenString, _ := tokenInterface.(string)
-
-	email, err := cryptolib.ParseToken(tokenString)
-	if err != nil {
-
-		c.Response(false, nil, "Token is invalid", http.StatusBadRequest, nil)
-		return
-	}
-
-	var user user.User
-	emailString, _ := email.(string)
-	user.Email = string(emailString)
-
-	result, err := user.GetUser("email", emailString)
-	if err != nil {
-		c.Response(false, nil, "No user found", http.StatusForbidden, nil)
-		return
-	}
-
-	c.Response(true, result, "user found", http.StatusOK, nil)
-
-}
