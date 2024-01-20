@@ -54,6 +54,5 @@ func (user *User) DoesPassWordMatch() bool {
 	result, _ := user.GetUser("email", user.Email)
 
 	return cryptolib.CompareHashWithText(result.PasswordHash, user.PasswordHash)
-	// return result.PasswordHash == user.PasswordHash
 
 }

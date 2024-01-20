@@ -13,6 +13,7 @@ import (
 	"github.com/consoledot/notely/auth"
 	db "github.com/consoledot/notely/database"
 	"github.com/consoledot/notely/notes"
+	"github.com/consoledot/notely/user"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -40,14 +41,20 @@ func main() {
 
 func routes() http.Handler {
 	router := mux.NewRouter()
-	router.HandleFunc("/", notes.CreateNewNotes).Methods("POST")
-	router.HandleFunc("/", notes.GetNotes).Methods("GET")
-	router.HandleFunc("/{id}", notes.DeleteNote).Methods("DELETE")
-	router.HandleFunc("/{id}", notes.GetNote).Methods("GET")
-	router.HandleFunc("/{id}", notes.EditNote).Methods("PUT")
-	router.HandleFunc("/auth/create-account", auth.CreateAccount).Methods("POST")
-	router.HandleFunc("/auth/sign-in", auth.SignIn).Methods("POST")
-	router.HandleFunc("/user/me", auth.GetUserDetails).Methods("GET")
+	userRouter := router.PathPrefix("/user").Subrouter()
+	notesRouter := router.PathPrefix("/notes").Subrouter()
+	authRouter := router.PathPrefix("/auth").Subrouter()
+
+	protectedRoutes := []*mux.Router{notesRouter, userRouter}
+
+	for _, routes := range protectedRoutes {
+		routes.Use(auth.AuthMiddleware)
+	}
+
+	notes.NotesRouter(notesRouter)
+	user.UserRoutes(userRouter)
+	auth.AuthRouter(authRouter)
+
 	return router
 }
 

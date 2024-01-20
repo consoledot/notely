@@ -56,14 +56,15 @@ func (c *C) GetJSONfromRequestBody(data any) error {
 	return err
 }
 
-func (c *C) GetTokenStringFromHeader() (interface{}, error) {
+func (c *C) GetTokenStringFromHeader() (string, error) {
 	authHeader := c.R.Header.Get("Authorization")
 
 	if authHeader != "" && strings.HasPrefix(authHeader, "Bearer ") {
+
 		token := authHeader[7:]
 
 		return token, nil
 	} else {
-		return nil, fmt.Errorf("no token found")
+		return "", fmt.Errorf("no token found")
 	}
 }
