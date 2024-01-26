@@ -2,7 +2,7 @@
 An app that allows you manage your notes. 
 
 ## Technology 
-Go and React for the frontend. 
+Go. 
 
 ## Features 
 - Create note
