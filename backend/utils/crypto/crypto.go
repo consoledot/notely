@@ -23,13 +23,14 @@ func CompareHashWithText(hash string, text string) bool {
 	return err == nil
 }
 
-func CreateToken(email string) (string, error) {
+func CreateToken(email string, id string) (string, error) {
 
 	fmt.Println("JWT_SECRET_KEY:", os.Getenv("JWT_SECRET_KEY"))
 	// Create a new claim
 
 	claims := jwt.MapClaims{
 		"email": email,
+		"id":    id,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}
 

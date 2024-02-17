@@ -40,7 +40,8 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Error creating account", http.StatusBadGateway, nil)
 		return
 	}
-	token, err := cryptolib.CreateToken(user.Email)
+	userId := user.Id.Hex()
+	token, err := cryptolib.CreateToken(user.Email, userId)
 	if err != nil {
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
 		return
@@ -72,7 +73,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Invalid credentials", http.StatusBadRequest, nil)
 		return
 	}
-	token, err := cryptolib.CreateToken(user.Email)
+	userId := user.Id.Hex()
+	token, err := cryptolib.CreateToken(user.Email, userId)
 	if err != nil {
 		fmt.Println(err, token)
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)

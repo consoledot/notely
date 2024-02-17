@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 
 	"log"
 	"os"
@@ -20,7 +19,7 @@ var (
 )
 
 func Connect() {
-	fmt.Println("Dban", dbName)
+
 	//  Set up connection string
 	mongoURI := os.Getenv("MONGO_URI")
 
