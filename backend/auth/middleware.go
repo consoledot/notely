@@ -16,14 +16,20 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			c.Response(false, nil, "Unauthorized", http.StatusBadRequest, nil)
 			return
 		}
-		userEmail, err := cryptolib.ParseToken((token))
+		userId, userEmail, err := cryptolib.ParseToken((token))
 		if err != nil {
 
 			c.Response(false, nil, "Unauthorized", http.StatusUnauthorized, nil)
 			return
 		}
 		emailString, _ := userEmail.(string)
-		ctx := context.WithValue(r.Context(), "userEmail", emailString)
+		userIdString, _ := userId.(string)
+		tokenResponse := cryptolib.TokenResponse{
+			Id:    userIdString,
+			Email: emailString,
+		}
+
+		ctx := context.WithValue(r.Context(), cryptolib.TokenResponse{}, tokenResponse)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 	})

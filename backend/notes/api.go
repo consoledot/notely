@@ -36,7 +36,14 @@ func GetNotes(w http.ResponseWriter, r *http.Request) {
 func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
 	c := httplib.C{W: w, R: r}
+	userId, ok := r.Context().Value("id").(string)
+	if !ok {
+		c.Response(false, nil, "Issue with creating account pls login again", http.StatusInternalServerError, nil)
+		return
+	}
 	var note Note
+	id, _ := primitive.ObjectIDFromHex(userId)
+	note.UserId = id
 
 	if err := c.GetJSONfromRequestBody(&note); err != nil {
 		fmt.Println(err)

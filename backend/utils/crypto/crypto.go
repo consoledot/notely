@@ -41,20 +41,26 @@ func CreateToken(email string, id string) (string, error) {
 	return tokenString, err
 }
 
-func ParseToken(tokenString string) (interface{}, error) {
+func ParseToken(tokenString string) (interface{}, interface{}, error) {
 	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return nil, fmt.Errorf("Invalid token")
+		return nil, nil, fmt.Errorf("Invalid token")
 	}
 
 	email := claims["email"]
-	return email, err
+	userId := claims["id"]
+	return email, userId, err
+}
+
+type TokenResponse struct {
+	Id    string
+	Email string
 }
