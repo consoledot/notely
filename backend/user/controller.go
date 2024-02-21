@@ -2,10 +2,12 @@ package user
 
 import (
 	"context"
+	"strings"
 
 	db "github.com/consoledot/notely/database"
 	cryptolib "github.com/consoledot/notely/utils/crypto"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func NewUser(email string, name string, passwordHash string) *User {
@@ -16,12 +18,15 @@ func NewUser(email string, name string, passwordHash string) *User {
 	}
 }
 
-func (user *User) CreateUser() (interface{}, error) {
+func (user *User) CreateUser() (string, error) {
 	coll := db.UsersCollection()
 
 	result, err := coll.InsertOne(context.TODO(), user)
-
-	return result.InsertedID, err
+	// id := primitive.ObjectID(result.InsertedID)
+	userId, _ := result.InsertedID.(primitive.ObjectID)
+	strId := userId.String()
+	hexID := strings.TrimPrefix(strings.TrimSuffix(strId, ")"), "ObjectID(")
+	return hexID, err
 
 }
 
