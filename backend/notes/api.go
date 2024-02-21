@@ -17,9 +17,12 @@ import (
 func GetNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
 	c := httplib.C{W: w, R: r}
-
+	tokenResponse := r.Context().Value(cryptolib.TokenResponse{}).(cryptolib.TokenResponse)
+	var user user.User
+	userResponse, _ := user.GetUser("email", tokenResponse.Email)
 	var result []Note
-	cusror, err := coll.Find(context.TODO(), bson.D{})
+	filter := bson.M{"created_by": userResponse.Id}
+	cusror, err := coll.Find(context.TODO(), filter)
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "Error getting notes", http.StatusNoContent, nil)
@@ -47,7 +50,7 @@ func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	note.UserId = result.Id
+	note.CreatedBy = result.Id
 	fmt.Println("kjhg", note)
 	if err := c.GetJSONfromRequestBody(&note); err != nil {
 		fmt.Println(err)
