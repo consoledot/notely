@@ -7,6 +7,8 @@ import (
 	"net/http"
 
 	db "github.com/consoledot/notely/database"
+	"github.com/consoledot/notely/user"
+	cryptolib "github.com/consoledot/notely/utils/crypto"
 	httplib "github.com/consoledot/notely/utils/httplib"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -36,22 +38,24 @@ func GetNotes(w http.ResponseWriter, r *http.Request) {
 func CreateNewNotes(w http.ResponseWriter, r *http.Request) {
 	var coll = db.NotesCollection()
 	c := httplib.C{W: w, R: r}
-	userId, ok := r.Context().Value("id").(string)
-	if !ok {
-		c.Response(false, nil, "Issue with creating account pls login again", http.StatusInternalServerError, nil)
+	tokenResponse := r.Context().Value(cryptolib.TokenResponse{}).(cryptolib.TokenResponse)
+	var note Note
+	var user user.User
+	result, err := user.GetUser("email", tokenResponse.Email)
+	if err != nil {
+		c.Response(false, nil, "No user found", http.StatusForbidden, nil)
 		return
 	}
-	var note Note
-	id, _ := primitive.ObjectIDFromHex(userId)
-	note.UserId = id
 
+	note.UserId = result.Id
+	fmt.Println("kjhg", note)
 	if err := c.GetJSONfromRequestBody(&note); err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest, nil)
 		return
 	}
 
-	_, err := coll.InsertOne(context.TODO(), note)
+	_, err = coll.InsertOne(context.TODO(), note)
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "error creating note", http.StatusBadRequest, nil)

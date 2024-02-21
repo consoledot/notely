@@ -16,7 +16,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			c.Response(false, nil, "Unauthorized", http.StatusBadRequest, nil)
 			return
 		}
-		userId, userEmail, err := cryptolib.ParseToken((token))
+		userEmail, userId, err := cryptolib.ParseToken((token))
 		if err != nil {
 
 			c.Response(false, nil, "Unauthorized", http.StatusUnauthorized, nil)

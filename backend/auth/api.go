@@ -34,13 +34,14 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "User already exist", http.StatusBadRequest, nil)
 		return
 	}
-	_, err = user.CreateUser()
+	userId, err := user.CreateUser()
 	if err != nil {
 		fmt.Println(err)
 		c.Response(false, nil, "Error creating account", http.StatusBadGateway, nil)
 		return
 	}
-	userId := user.Id.Hex()
+
+	fmt.Printf("Id: %v", userId)
 	token, err := cryptolib.CreateToken(user.Email, userId)
 	if err != nil {
 		c.Response(false, nil, "Error creating user token, try login in", http.StatusBadGateway, nil)
@@ -73,7 +74,8 @@ func SignIn(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "Invalid credentials", http.StatusBadRequest, nil)
 		return
 	}
-	userId := user.Id.Hex()
+	userId := user.Id.String()
+	fmt.Printf("userId %v", userId)
 	token, err := cryptolib.CreateToken(user.Email, userId)
 	if err != nil {
 		fmt.Println(err, token)
