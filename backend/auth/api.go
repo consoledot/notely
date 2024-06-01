@@ -34,6 +34,7 @@ func CreateAccount(w http.ResponseWriter, r *http.Request) {
 		c.Response(false, nil, "User already exist", http.StatusBadRequest, nil)
 		return
 	}
+
 	userId, err := user.CreateUser()
 	if err != nil {
 		fmt.Println(err)
