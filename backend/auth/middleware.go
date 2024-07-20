@@ -12,6 +12,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c := httplib.C{W: w, R: r}
 		token, err := c.GetTokenStringFromHeader()
+	
 		if err != nil {
 			c.Response(false, nil, "Unauthorized", http.StatusBadRequest, nil)
 			return

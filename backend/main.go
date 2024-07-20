@@ -20,6 +20,7 @@ import (
 
 func main() {
 	_ = godotenv.Load()
+
 	db.Connect()
 	defer db.Disconnect()
 

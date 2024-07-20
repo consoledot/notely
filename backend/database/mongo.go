@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 
 	"log"
 	"os"
@@ -22,6 +23,7 @@ func Connect() {
 
 	//  Set up connection string
 	mongoURI := os.Getenv("MONGO_URI")
+	fmt.Println(mongoURI)
 
 	// Set up options
 	clientOptions := options.Client().ApplyURI(mongoURI)
